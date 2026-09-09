@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Un pequeño detallito que te hice</title>
     
-    <!-- Font Awesome para la pistola -->
+    <!-- Font Awesome para la pistola y el ojito -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
@@ -71,10 +71,18 @@
             margin-bottom: 25px;
         }
 
+        /* ============================================================ */
+        /*  DISPLAY DE PIN CON OJITO */
+        /* ============================================================ */
+        .pin-display-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
         .pin-display {
             width: 100%;
-            padding: 14px;
-            margin-bottom: 20px;
+            padding: 14px 50px 14px 20px;
             border: 2px solid rgba(255, 0, 127, 0.3);
             border-radius: 12px;
             background: rgba(0, 0, 0, 0.5);
@@ -90,6 +98,45 @@
             font-family: monospace;
         }
 
+        .pin-display .asterisco {
+            color: #ff1493;
+            font-size: 1.8rem;
+        }
+
+        .pin-display .numero-visible {
+            color: #ffffff;
+            font-size: 1.6rem;
+        }
+
+        /* ============================================================ */
+        /*  OJITO PARA MOSTRAR/OCULTAR */
+        /* ============================================================ */
+        .btn-toggle-pin {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 8px;
+            transition: color 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-toggle-pin:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-toggle-pin.active {
+            color: #ff1493;
+        }
+
+        /* ============================================================ */
+        /*  TECLADO NUMÉRICO */
+        /* ============================================================ */
         .pin-keyboard {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
@@ -369,6 +416,7 @@
                 100% { opacity: 0; transform: scale(1.5) translate(310px, -15px); }
             }
             .texto-carga { font-size: 12px; bottom: 3%; }
+            .btn-toggle-pin { font-size: 1.2rem; right: 10px; }
         }
     </style>
 </head>
@@ -384,7 +432,12 @@
         <h2>🔐 Acceso Privado</h2>
         <p>INTRODUCE TU FECHA DE NACIMIENTO</p>
 
-        <div class="pin-display" id="pinDisplay"> </div>
+        <div class="pin-display-wrapper">
+            <div class="pin-display" id="pinDisplay"> </div>
+            <button class="btn-toggle-pin" id="btnTogglePin" title="Mostrar/Ocultar">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
 
         <div class="pin-keyboard">
             <div class="key" data-num="1">1</div>
@@ -418,7 +471,7 @@
     <!--  TEXTO -->
     <!-- ============================================================ -->
     <div class="texto-libre" id="textoLibre">
-        <div class="titulo">🌸 Un pequeño detallito que te hice 🌸</div>
+        <div class="titulo">🌸 Un pequeño detallito que te hice</div>
         <div class="frase">✨ "Las flores no necesitan palabras, ¿verdad?" ✨</div>
     </div>
 
@@ -439,10 +492,12 @@
         // ============================================================
         const CLAVE_CORRECTA = '07092003';
         let entrada = '';
+        let mostrarPin = false;
 
         const loginContainer = document.getElementById('loginContainer');
         const display = document.getElementById('pinDisplay');
         const errorMsg = document.getElementById('errorMsg');
+        const btnTogglePin = document.getElementById('btnTogglePin');
         const textoLibre = document.getElementById('textoLibre');
         const arbolCanvas = document.getElementById('arbolCanvas');
         const audio = document.getElementById('bgMusic');
@@ -456,7 +511,37 @@
         let puedeDisparar = true;
         let regaloExplotado = false;
 
-        // --- TECLADO VIRTUAL ---
+        // ============================================================
+        //  FUNCIÓN PARA ACTUALIZAR EL DISPLAY DEL PIN
+        // ============================================================
+        function actualizarDisplay() {
+            let texto = '';
+            if (mostrarPin) {
+                // Mostrar números
+                const mostrado = entrada.padEnd(8, ' ').split('').join(' ');
+                texto = mostrado;
+            } else {
+                // Mostrar asteriscos
+                const asteriscos = entrada.replace(/./g, '•').padEnd(8, ' ').split('').join(' ');
+                texto = asteriscos;
+            }
+            display.textContent = texto || ' ';
+        }
+
+        // ============================================================
+        //  OJITO PARA MOSTRAR/OCULTAR
+        // ============================================================
+        btnTogglePin.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mostrarPin = !mostrarPin;
+            this.innerHTML = mostrarPin ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            this.classList.toggle('active', mostrarPin);
+            actualizarDisplay();
+        });
+
+        // ============================================================
+        //  TECLADO VIRTUAL
+        // ============================================================
         document.querySelectorAll('[data-num]').forEach(btn => {
             btn.addEventListener('click', () => {
                 const num = btn.dataset.num;
@@ -497,11 +582,6 @@
                 }, 300);
             }
         });
-
-        function actualizarDisplay() {
-            const mostrado = entrada.padEnd(8, ' ').split('').join(' ');
-            display.textContent = mostrado || ' ';
-        }
 
         const styleShake = document.createElement('style');
         styleShake.textContent = `
@@ -709,12 +789,11 @@
         });
 
         // ============================================================
-        //  PARTÍCULAS DE FONDO (OPTIMIZADAS)
+        //  PARTÍCULAS DE FONDO
         // ============================================================
         const canvasBg = document.getElementById('particleCanvas');
         const ctxBg = canvasBg.getContext('2d');
         let particles = [];
-        let bgAnimId = null;
 
         function resizeCanvas() {
             canvasBg.width = window.innerWidth;
@@ -765,12 +844,12 @@
                 particles[i].update();
                 particles[i].draw();
             }
-            bgAnimId = requestAnimationFrame(animateBg);
+            requestAnimationFrame(animateBg);
         }
         animateBg();
 
         // ============================================================
-        //  🌸 ÁRBOL OPTIMIZADO (MANTIENE 400 FLORES)
+        //  🌸 ÁRBOL CON FLORES MÁS GRANDES (500 FLORES)
         // ============================================================
         const canvasArbol = document.getElementById('arbolCanvas');
         const ctxArbol = canvasArbol.getContext('2d');
@@ -780,7 +859,7 @@
         let progresoCrecimiento = 0;
         let faseFlores = false;
         const VEL_CRECIMIENTO = 0.008;
-        const TOTAL_FLORES = 400;
+        const TOTAL_FLORES = 500;
         let troncoData = null;
         let ramasData = [];
         let texturaTronco = [];
@@ -800,20 +879,20 @@
             ctx.rotate(rot || 0);
             const s = size;
             const petalos = 5;
-            ctx.shadowBlur = 12;
+            ctx.shadowBlur = 15;
             ctx.shadowColor = color;
             for (let i = 0; i < petalos; i++) {
                 const angle = (i / petalos) * Math.PI * 2;
                 const px = Math.cos(angle) * s * 0.5;
                 const py = Math.sin(angle) * s * 0.5;
                 ctx.beginPath();
-                ctx.ellipse(px, py, s * 0.4, s * 0.22, angle, 0, Math.PI * 2);
+                ctx.ellipse(px, py, s * 0.45, s * 0.25, angle, 0, Math.PI * 2);
                 ctx.fillStyle = color;
                 ctx.fill();
             }
             ctx.shadowBlur = 0;
             ctx.beginPath();
-            ctx.arc(0, 0, s * 0.15, 0, Math.PI * 2);
+            ctx.arc(0, 0, s * 0.18, 0, Math.PI * 2);
             ctx.fillStyle = centroColor;
             ctx.fill();
             ctx.restore();
@@ -878,8 +957,8 @@
                 const ry = (Math.random() * 2 - 1) * 16 * 1.05;
                 if (estaDentroCorazon(rx, ry)) {
                     puntos.push({
-                        x: cx + rx * escala + (Math.random() - 0.5) * 5,
-                        y: cy - ry * escala * 0.9 + (Math.random() - 0.5) * 5
+                        x: cx + rx * escala + (Math.random() - 0.5) * 6,
+                        y: cy - ry * escala * 0.9 + (Math.random() - 0.5) * 6
                     });
                     generados++;
                 }
@@ -889,8 +968,8 @@
 
         function generarEstructuraArbol(w, h) {
             const baseX = w / 2, baseY = h * 0.97;
-            const troncoAltura = h * 0.42;
-            const anchoTroncoBase = Math.min(w, h) * 0.05;
+            const troncoAltura = h * 0.48;
+            const anchoTroncoBase = Math.min(w, h) * 0.055;
             troncoData = { baseX, baseY, altura: troncoAltura, anchoBase: anchoTroncoBase };
             pasto = generarPasto(w, h, baseY);
 
@@ -906,10 +985,10 @@
             }
 
             ramasData = [];
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 8; i++) {
                 const anguloBase = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
-                const longitud = h * (0.20 + Math.random() * 0.14);
-                const grosor = 5 + Math.random() * 5;
+                const longitud = h * (0.22 + Math.random() * 0.16);
+                const grosor = 5 + Math.random() * 6;
                 const tY = 0.15 + Math.random() * 0.5;
                 const startY = baseY - troncoAltura * tY;
                 const startX = baseX + (Math.random() - 0.5) * anchoTroncoBase * 0.5;
@@ -934,8 +1013,8 @@
 
             flores = [];
             const centroCorazonX = baseX;
-            const centroCorazonY = baseY - h * 0.46;
-            const tamanioCorazon = Math.min(w, h) * 0.33;
+            const centroCorazonY = baseY - h * 0.50;
+            const tamanioCorazon = Math.min(w, h) * 0.42;
             const puntosCorazon = generarPuntosCorazon(centroCorazonX, centroCorazonY, tamanioCorazon, TOTAL_FLORES);
             const colores = ['#ff4d8a', '#ff6b9d', '#ff80b3', '#ff99c2', '#ffb3cc', '#ff3388', '#ff1a75', '#e6005c', '#ff0066', '#ff1493', '#ff4da6', '#ff6699', '#ff8cba', '#ffaacc', '#ffcce0', '#ffd9e6', '#ff3366', '#ff6699', '#ff99cc', '#ffccdd'];
             const centros = ['#FFD700', '#FFC0CB', '#FF69B4', '#FFB6C1', '#FF1493', '#FFD700'];
@@ -944,7 +1023,7 @@
                 const distCentro = Math.sqrt(Math.pow(p.x - centroCorazonX, 2) + Math.pow(p.y - centroCorazonY, 2));
                 const maxDist = tamanioCorazon * 0.9;
                 const factorTamaño = 1 - Math.min(distCentro / maxDist, 1) * 0.3;
-                const size = 8 + Math.random() * 16 + factorTamaño * 10;
+                const size = 12 + Math.random() * 22 + factorTamaño * 12;
                 flores.push({
                     x: p.x, y: p.y, size,
                     color: colores[Math.floor(Math.random() * colores.length)],
@@ -1066,7 +1145,7 @@
             const factor = progresoCrecimiento;
             dibujarTroncoYRamass(ctxArbol, w, h, factor);
             if (faseFlores) {
-                const limiteSuperior = h * 0.20;
+                const limiteSuperior = h * 0.18;
                 for (const flor of flores) {
                     flor.contador++;
                     if (flor.contador > flor.retraso && flor.apareciendo) {
@@ -1089,5 +1168,6 @@
         actualizarDisplay();
         window.addEventListener('resize', resizeArbolCanvas);
     </script>
+
 </body>
 </html>
