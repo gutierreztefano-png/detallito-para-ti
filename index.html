@@ -98,14 +98,19 @@
             font-family: monospace;
         }
 
+        /* ============================================================ */
+        /*  ASTERISCOS MÁS PEQUEÑOS */
+        /* ============================================================ */
         .pin-display .asterisco {
             color: #ff1493;
-            font-size: 1.8rem;
+            font-size: 0.9rem;
+            letter-spacing: 8px;
         }
 
         .pin-display .numero-visible {
             color: #ffffff;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
+            letter-spacing: 6px;
         }
 
         /* ============================================================ */
@@ -220,6 +225,41 @@
             display: flex;
         }
 
+        /* ============================================================ */
+        /*  TEXTO "Toca la pantalla para disparar" COMO TÍTULO ARRIBA */
+        /* ============================================================ */
+        .texto-disparo {
+            position: absolute;
+            top: 8%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 20;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            animation: parpadear 1.5s ease-in-out infinite;
+            pointer-events: none;
+            padding: 0 20px;
+            text-shadow: 0 0 30px rgba(255, 20, 147, 0.3);
+        }
+
+        .texto-disparo span {
+            color: #ff1493;
+            font-weight: 700;
+        }
+
+        @media (max-width: 500px) {
+            .texto-disparo {
+                font-size: 1.2rem;
+                top: 5%;
+            }
+        }
+
+        /* ============================================================ */
+        /*  PISTOLA Y REGALO */
+        /* ============================================================ */
         .pistola-icon {
             font-size: 120px;
             color: #ff1493;
@@ -279,33 +319,13 @@
             100% { opacity: 0; transform: scale(1.5) translate(440px, -20px); }
         }
 
-        .texto-carga {
-            position: absolute;
-            bottom: 5%;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            z-index: 20;
-            color: rgba(255, 255, 255, 0.25);
-            font-size: 14px;
-            letter-spacing: 1px;
-            animation: parpadear 1.5s ease-in-out infinite;
-            pointer-events: none;
-            padding: 0 20px;
-        }
-
-        .texto-carga span {
-            color: #ff1493;
-            font-weight: bold;
-        }
-
         @keyframes parpadear {
-            0%, 100% { opacity: 0.3; }
+            0%, 100% { opacity: 0.4; }
             50% { opacity: 1; }
         }
 
         /* ============================================================ */
-        /*  TEXTO */
+        /*  TEXTO FINAL */
         /* ============================================================ */
         .texto-libre {
             position: fixed;
@@ -406,16 +426,18 @@
             .texto-libre .frase { font-size: 1rem; }
             .login-container { padding: 30px 20px 35px; }
             .key { padding: 14px 0; font-size: 1.1rem; }
-            .pin-display { font-size: 1.3rem; letter-spacing: 4px; min-height: 50px; }
+            .pin-display { font-size: 1.3rem; letter-spacing: 4px; min-height: 50px; padding: 12px 45px 12px 16px; }
+            .pin-display .asterisco { font-size: 0.7rem; letter-spacing: 6px; }
+            .pin-display .numero-visible { font-size: 1.1rem; letter-spacing: 4px; }
             .pistola-icon { font-size: 90px; left: 3%; bottom: 22%; }
             .regalo-icon { font-size: 100px; right: 3%; bottom: 18%; }
             .flor-disparo { font-size: 32px; left: 11%; bottom: 30%; }
+            .texto-disparo { font-size: 1.2rem; top: 5%; }
             @keyframes viajarAlRegalo {
                 0% { opacity: 1; transform: scale(0.5) translate(0, 0); }
                 40% { opacity: 1; transform: scale(1.1) translate(90px, -8px); }
                 100% { opacity: 0; transform: scale(1.5) translate(310px, -15px); }
             }
-            .texto-carga { font-size: 12px; bottom: 3%; }
             .btn-toggle-pin { font-size: 1.2rem; right: 10px; }
         }
     </style>
@@ -461,14 +483,17 @@
     <!--  CINEMÁTICA: PISTOLA + REGALO -->
     <!-- ============================================================ -->
     <div class="cinematica-container" id="cinematicaContainer">
+        
+        <!-- TEXTO "Toca la pantalla para disparar" ARRIBA -->
+        <div class="texto-disparo">🌸 Toca la pantalla para <span>disparar</span> la flor al regalo 🎁</div>
+
         <i class="fas fa-gun pistola-icon" id="pistola"></i>
         <div class="regalo-icon" id="regalo">🎁</div>
         <div class="flor-disparo" id="florDisparo">🌼</div>
-        <div class="texto-carga">🌸 Toca la pantalla para <span>disparar</span> la flor al regalo 🎁</div>
     </div>
 
     <!-- ============================================================ -->
-    <!--  TEXTO -->
+    <!--  TEXTO FINAL -->
     <!-- ============================================================ -->
     <div class="texto-libre" id="textoLibre">
         <div class="titulo">🌸 Un pequeño detallito que te hice</div>
@@ -519,13 +544,13 @@
             if (mostrarPin) {
                 // Mostrar números
                 const mostrado = entrada.padEnd(8, ' ').split('').join(' ');
-                texto = mostrado;
+                texto = `<span class="numero-visible">${mostrado}</span>`;
             } else {
-                // Mostrar asteriscos
+                // Mostrar asteriscos más pequeños
                 const asteriscos = entrada.replace(/./g, '•').padEnd(8, ' ').split('').join(' ');
-                texto = asteriscos;
+                texto = `<span class="asterisco">${asteriscos}</span>`;
             }
-            display.textContent = texto || ' ';
+            display.innerHTML = texto || ' ';
         }
 
         // ============================================================
